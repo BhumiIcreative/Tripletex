@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record id="ak_tripletex_invoice_inherit_view_account_move_reversal" model="ir.ui.view">
+            <field name="name">account.move.reversal.form.view</field>
+            <field name="model">account.move.reversal</field>
+            <field name="inherit_id" ref="account.view_account_move_reversal"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='date']" position="after">
+                    <field name="invoice" readonly="1"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

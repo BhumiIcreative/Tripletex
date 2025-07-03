@@ -1,0 +1,44 @@
+<odoo>
+    <record id="tripletex_supplier_sync_form_view" model="ir.ui.view">
+        <field name="name">tripletex.supplier.sync.form.view</field>
+        <field name="model">tripletex.supplier.sync</field>
+        <field name="arch" type="xml">
+            <form string="Supplier Sync">
+                <p style="text-align:center;">
+                    <p>This functionality will update supplier in Tripletex from Odoo.
+                    </p>
+                    <group>
+                        <button string="Supplier Sync" class="oe_highlight" type="object"
+                                name="supplier_sync" icon="fa-file"/>
+                    </group>
+                    <br/>
+                    <p>This functionality will import supplier from Tripletex to Odoo.
+                    </p>
+                    <group>
+                        <button string="Import Supplier from Tripletex" class="oe_highlight" type="object"
+                                name="import_supplier_from_tripletex" icon="fa-file"/>
+                    </group>
+                    <br/>
+                    <p>This functionality will import supplier from Odoo to Tripletex.
+                    </p>
+                    <group>
+                        <button string="Import Supplier from Odoo" class="oe_highlight" type="object"
+                                name="import_supplier_from_odoo" icon="fa-file"/>
+                    </group>
+                </p>
+                <footer>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_tripletex_supplier_sync" model="ir.actions.act_window">
+        <field name="name">Supplier Sync</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">tripletex.supplier.sync</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+
+</odoo>

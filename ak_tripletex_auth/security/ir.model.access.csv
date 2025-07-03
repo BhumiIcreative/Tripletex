@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_tripletex_session_token,access.tripletex.session.token,model_tripletex_session_token,base.group_user,1,1,1,1
+access_session_token_wizard,access.session.token.wizard,model_session_token_wizard,base.group_user,1,1,1,1
+access_tripletex_product_map,access.tripletex.product.map,model_tripletex_product_map,base.group_user,1,1,1,1
+access_tripletex_customer_load,access.tripletex.customer.load,model_tripletex_customer_load,base.group_user,1,1,1,1
+access_tripletex_customer,access.tripletex.consumer,model_tripletex_consumer,base.group_user,1,1,1,1
+access_tripletex_postal_address_line,access.postal.address.line,model_postal_address_line,base.group_user,1,1,1,1
+access_tripletex_delivery_address_line,access.delivery.address.line,model_delivery_address_line,base.group_user,1,1,1,1
+access_tripletex_contact_data,access.tripletex.contact,model_tripletex_contact,base.group_user,1,1,1,1
+access_tripletex_contact_sync,access_tripletex_contact_sync,ak_tripletex_auth.model_tripletex_contact_sync,base.group_user,1,0,0,0
+access_tripletex_supplier_sync,access_tripletex_supplier_sync,ak_tripletex_auth.model_tripletex_supplier_sync,base.group_user,1,0,0,0
+access_uom_common_code,access_uom_common_code,ak_tripletex_auth.model_uom_common_code,base.group_user,1,1,1,1
+ak_tripletex_auth.access_business_address_line,access_business_address_line,ak_tripletex_auth.model_business_address_line,base.group_user,1,1,1,1

@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record id="ak_tripletex_invoice_inherit_view_tax_form" model="ir.ui.view">
+            <field name="name">account.tax.form.view</field>
+            <field name="model">account.tax</field>
+            <field name="inherit_id" ref="account.view_tax_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='advanced_options']/group/group" position="inside">
+                    <field name="tripletex_tax"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

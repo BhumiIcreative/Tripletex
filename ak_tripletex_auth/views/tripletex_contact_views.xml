@@ -1,0 +1,41 @@
+<odoo>
+        <record id="tripletex_contact_list_view" model="ir.ui.view">
+            <field name="name">tripletex.contact.list</field>
+            <field name="model">tripletex.contact</field>
+            <field name="arch" type="xml">
+                <list string="Tripletex Contact Data">
+                    <field name="tripletex"/>
+                    <field name="first_name"/>
+                    <field name="last_name"/>
+                    <field name="email"/>
+                    <field name="mobile"/>
+                </list>
+            </field>
+        </record>
+        <!-- Form view for tripletex.consumer -->
+        <record id="tripletex_contact_data_form_view" model="ir.ui.view">
+            <field name="name">tripletex.contact.form</field>
+            <field name="model">tripletex.contact</field>
+            <field name="arch" type="xml">
+                <form string="Tripletex Contact Data">
+                    <sheet>
+                        <group>
+                            <field name="tripletex"/>
+                            <field name="first_name"/>
+                            <field name="last_name"/>
+                            <field name="email"/>
+                            <field name="mobile"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="action_create_tripletex_contact_data" model="ir.actions.act_window">
+            <field name="name">Create Contact</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">tripletex.contact</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+
+</odoo>

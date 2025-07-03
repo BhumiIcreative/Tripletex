@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record id="ak_tripletex_invoice_inherit_view_company_form" model="ir.ui.view">
+            <field name="name">res.company.form.view</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="is_tripletex"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

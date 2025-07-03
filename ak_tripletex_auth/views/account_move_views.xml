@@ -1,0 +1,27 @@
+<odoo>
+    <data>
+        <record id="ak_tripletex_invoice_inherit_view_move_form" model="ir.ui.view">
+            <field name="name">account.move.form.view</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='journal_div']" position="after">
+                    <field name="tripletex_comment"/>
+                </xpath>
+                <xpath expr="//field[@name='partner_shipping_id']" position="after">
+                    <field name="is_hidden" widget="boolean_toggle" />
+                    <field name="invoice_num" invisible="not is_hidden" />
+                    <field name="invoice" invisible="not is_hidden" />
+                    <field name="customer" invisible="True" />
+                    <field name="sale_order_id" invisible="True"/>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='product_id']" position="after">
+                    <field name="tripletex_product" optional="hide"/>
+                </xpath>
+                <xpath expr="//button[@name='button_draft']" position="attributes">
+                    <attribute name="invisible">true</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

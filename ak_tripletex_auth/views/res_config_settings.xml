@@ -1,0 +1,27 @@
+<odoo>
+    <record id="ak_tripletex_auth_inherit_res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.form.inherit</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='integration']/setting[last()]" position="after">
+                <setting string="Tripletex Setting" help="Tripletex credentials" id="tripletex">
+                    <div class="text-muted">
+                        <label for="customer_token"/>
+                        <br/>
+                        <field name="customer_token"/>
+                        <br/>
+                        <label for="emp_token"/>
+                        <br/>
+                        <field name="emp_token"/>
+                        <br/>
+                        <br/>
+                        <label for="base_url"/>
+                        <br/>
+                        <field name="base_url"/>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

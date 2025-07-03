@@ -1,0 +1,60 @@
+<odoo>
+    <data>
+        <record id="ak_tripletex_invoice_inherit_view_partner_form" model="ir.ui.view">
+            <field name="name">res.partner.form.view</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@class='o_address_format']" position="after">
+                    <field name="is_hidden" widget="boolean_toggle"/>
+                    <field name="trip_customer" invisible="not is_hidden"/>
+                </xpath>
+                <xpath expr="//field[@name='website']" position="before">
+                    <!--                    <group>-->
+                    <field name="alternate_email" widget="email"/>
+                    <!--                    </group>-->
+                </xpath>
+                <xpath expr="//page[@name='internal_notes']" position="after">
+
+                    <page string="Tripletex">
+                        <group>
+                            <group>
+                                <span class="o_form_label o_td_label o_address_type">
+                                    <span>Business Address</span>
+                                </span>
+                                <div class="o_address_format">
+                                    <field name="business_street" placeholder="Street..." class="o_address_street"
+                                           readonly="type == 'contact' and parent_id"/>
+                                    <field name="business_street2" placeholder="Street 2..." class="o_address_street"
+                                           readonly="type == 'contact' and parent_id"/>
+                                    <field name="business_city" placeholder="City" class="o_address_city"
+                                           readonly="type == 'contact' and parent_id"/>
+                                    <field name="business_zip" placeholder="ZIP" class="o_address_zip"
+                                           readonly="type == 'contact' and parent_id"/>
+                                    <div name="partner_address_country" class="d-flex justify-content-between">
+                                        <field name="business_country_id" placeholder="Country"
+                                               class="o_address_country"
+                                               options='{"no_open": True, "no_create": True}'
+                                               readonly="type == 'contact' and parent_id"/>
+                                    </div>
+                                </div>
+                            </group>
+                            <group string="Automatic reminders">
+                                <field name="is_soft_reminder"/>
+                                <field name="is_reminder"/>
+                                <field name="is_notice_od_debt"/>
+                            </group>
+                        </group>
+                        <group string="Invoice Setting">
+                            <group>
+                                <field name="due_date"/>
+                                <field name="discountPercentage"/>
+                                <field name="is_single_customer_invoice"/>
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

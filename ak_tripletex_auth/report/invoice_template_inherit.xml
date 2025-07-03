@@ -1,0 +1,14 @@
+<odoo>
+    <template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
+        <xpath expr="//p[@name='payment_communication']" position="after">
+            <p>
+                <span><strong>Product Serial Number:</strong></span><br/>
+                <t t-foreach="o.invoice_line_ids" t-as="line">
+                <span t-if="line.product_id">
+                    <t t-esc="line.product_id.default_code"/> <!-- or use another field that holds the serial number -->
+                </span><br/>
+            </t>
+            </p>
+        </xpath>
+    </template>
+</odoo>

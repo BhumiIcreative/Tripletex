@@ -1,0 +1,28 @@
+<odoo>
+    <record id="session_token_wizard_form_view" model="ir.ui.view">
+        <field name="name">session.create.form.view</field>
+        <field name="model">session.token.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="expiration_date"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="session_token_generate" string="Token Create" type="object"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_session_token_wizard" model="ir.actions.act_window">
+        <field name="name">Create Session Token</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">session.token.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

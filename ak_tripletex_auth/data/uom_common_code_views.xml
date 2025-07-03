@@ -1,0 +1,43 @@
+<odoo>
+    <data>
+        <record id="uom_common_code_kgm" model="uom.common.code">
+            <field name="name">KGM</field>
+        </record>
+        <record id="uom_common_code_ltr" model="uom.common.code">
+            <field name="name">LTR</field>
+        </record>
+        <record id="uom_common_code_pce" model="uom.common.code">
+            <field name="name">PCE</field>
+        </record>
+        <record id="uom_common_code_hur" model="uom.common.code">
+            <field name="name">HUR</field>
+        </record>
+        <record id="uom_common_code_day" model="uom.common.code">
+            <field name="name">DAY</field>
+        </record>
+        <record id="uom_common_code_mtk" model="uom.common.code">
+            <field name="name">MTK</field>
+        </record>
+        <record id="uom_common_code_mtr" model="uom.common.code">
+            <field name="name">MTR</field>
+        </record>
+        <record id="uom_common_code_lh" model="uom.common.code">
+            <field name="name">LH</field>
+        </record>
+        <record id="uom_common_code_st" model="uom.common.code">
+            <field name="name">ST</field>
+        </record>
+        <record id="uom_common_code_bd" model="uom.common.code">
+            <field name="name">BD</field>
+        </record>
+        <record id="uom_common_code_bx" model="uom.common.code">
+            <field name="name">BX</field>
+        </record>
+        <record id="uom_common_code_bo" model="uom.common.code">
+            <field name="name">BO</field>
+        </record>
+        <record id="uom_common_code_ct" model="uom.common.code">
+            <field name="name">CT</field>
+        </record>
+    </data>
+</odoo>
