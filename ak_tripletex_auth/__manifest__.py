@@ -39,7 +39,6 @@
         'wizard/tripletex_product_sync_views.xml',
         'wizard/tripletex_customer_sync_views.xml',
         'wizard/tripletex_supplier_sync_views.xml',
-        'wizard/tripletex_contact_sync_views.xml',
         'wizard/menuitems.xml',
     ],
     'images': ['static/description/banner.png'],

@@ -95,6 +95,7 @@ class ResPartner(models.Model):
         if base_url and password:
             for rec in vals_list:
                 if not rec.get('trip_customer'):
+                    print("\n$$$$$$$$$$")
                     data = {
                         'name': rec['name'],
                         'isSupplier': bool(rec.get('supplier_rank')),
@@ -138,7 +139,7 @@ class ResPartner(models.Model):
 
                     if rec.get('company_type') == 'company':
                         self.create_customer_in_tripletex(data, res)
-
+        print("\n\n***********************")
         return res
 
     def create_customer_in_tripletex(self, data, partner=None):

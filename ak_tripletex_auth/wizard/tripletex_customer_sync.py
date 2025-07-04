@@ -1,3 +1,4 @@
+from future.backports.http.client import responses
 from odoo import fields, models, api, _
 import requests
 import json
@@ -28,7 +29,7 @@ class TripletexCustomerDataLoad(models.TransientModel):
                     ('name', '=', data.get('name')),
                     '|',
                     ('email', '=', data.get('email')),
-                    ('l10n_no_bronnoysund_number', '=', data.get('organizationNumber')),
+                    ('vat', '=', data.get('organizationNumber')),
                     ('company_type', '=', 'personal' if data.get('isPrivateIndividual', False) else 'company'),
                 ])
                 if existing_contact:
@@ -39,32 +40,36 @@ class TripletexCustomerDataLoad(models.TransientModel):
     def customer_data_get_from_tripletex(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('ak_tripletex_auth.base_url')
         headers = {'Content-Type': 'application/json', "Accept": "application/json"}
-        username = 0
         password = self.env['tripletex.session.token'].search([], limit=1).token
         if not base_url:
             raise ValidationError(
                 _("Error: Base URL not configured. Please set 'ak_tripletex_auth.base_url' in the config parameters."))
         if not password:
             raise ValidationError(_("Error: Authentication token not found."))
+        return base_url, headers, password
+
+    def prepare_url_for_data_get(self):
+        base_url, headers, password = self.customer_data_get_from_tripletex()
         try:
-            initial_response = requests.get(f'{base_url}/customer', headers=headers, auth=(username, password))
+            initial_response = requests.get(f'{base_url}/customer', headers=headers, auth=(0, password))
         except Exception as e:
             raise ValidationError(e)
         if initial_response.status_code == 200:
             full_result_length = json.loads(initial_response.text).get('fullResultSize', 0)
             try:
                 response = requests.get(f'{base_url}/customer?from=0&count={full_result_length}', headers=headers,
-                                        auth=(username, password))
+                                        auth=(0, password))
             except Exception as e:
                 raise ValidationError(e)
-            return base_url, headers, response
+            return response
         return None
 
     def import_customer_from_tripletex(self):
-        base_url, headers, response = self.customer_data_get_from_tripletex()
+        response = self.prepare_url_for_data_get()
         if response.status_code == 200:
             all_data = json.loads(response.text)
             for data in all_data['values']:
+                print("\n\ndata::::::",data)
                 tripletex_id = data.get('id')
                 postal_address_data = data.get('postalAddress', {})
                 postal_vals = {}
@@ -83,7 +88,6 @@ class TripletexCustomerDataLoad(models.TransientModel):
                         'city': address_data['value'].get('city', ''),
                         'country_id': postal_country_data.get('id') if postal_country_data else False,
                     }
-
                 business_address_data = data.get('physicalAddress', {})
                 business_vals = {}
                 if (
@@ -117,6 +121,7 @@ class TripletexCustomerDataLoad(models.TransientModel):
 
                     # Additional fields from Tripletex payload
                     'supplier_rank': 1 if data.get('isSupplier') else 0,
+                    'customer_rank': 1 if data.get('isCustomer') else 0,
                     'vat': data.get('organizationNumber') or '',
                     'alternate_email': data.get('overdueNoticeEmail') or '',
                     'website': data.get('website') or '',
@@ -128,43 +133,16 @@ class TripletexCustomerDataLoad(models.TransientModel):
                     'discountPercentage': data.get('discountPercentage') or 0,
                     'comment': data.get('description') or '',
                     **postal_vals,
+                    **business_vals,
                 }
 
                 customer = self.env['res.partner'].search([('trip_customer', '=', tripletex_id)], limit=1)
-                print("\n\ncustomer trip_customer::::::",customer.trip_customer)
+                print("\n\ncustomer trip_customer::::::", customer.trip_customer)
                 if customer:
                     customer.write(customer_vals)
                 else:
+                    print("\n\ncustomer name:::::::::::",data.get('name'))
                     customer = self.env['res.partner'].create(customer_vals)
-
-                physical_address_data = data.get('physicalAddress', {})
-                if (
-                        physical_address_data
-                        and physical_address_data.get('id')
-                        and (address_data := self.fetch_address_data(physical_address_data['id']))
-                        and address_data.get('value')
-                ):
-                    country_data = address_data['value'].get('country', {})
-                    physical_country_data = self.get_country_data(country_data.get('id')) if country_data else {}
-
-                    physical_address_vals = {
-                        'tripletex': address_data['value'].get('id'),
-                        'street': address_data['value'].get('addressLine1'),
-                        'street2': address_data['value'].get('addressLine2'),
-                        'zip': address_data['value'].get('postalCode', ''),
-                        'city': address_data['value'].get('city', ''),
-                        'country': physical_country_data.get('name') if physical_country_data else '',
-                        'country_code': physical_country_data.get('iso_alpha2_code', '') if physical_country_data else '',
-                        'business_address_id': customer.id,
-                    }
-
-                    business_address = self.env['business.address.line'].search(
-                        [('tripletex', '=', physical_address_vals['tripletex'])], limit=1)
-
-                    if business_address:
-                        business_address.write(physical_address_vals)
-                    else:
-                        self.env['business.address.line'].create(physical_address_vals)
 
     def fetch_address_data(self, address_id):
         password = self.env['tripletex.session.token'].search([], limit=1).token
@@ -208,13 +186,14 @@ class TripletexCustomerDataLoad(models.TransientModel):
             return {}
 
     def import_customer_from_odoo(self):
-        base_url, headers, response = self.customer_data_get_from_tripletex()
+        response = self.prepare_url_for_data_get()
         external_numbers = set()
         if response.status_code == 200:
             external_numbers = {int(data['id']) for data in json.loads(response.text).get('values', []) if
                                 data.get('id')}
         for customer in self.env['res.partner'].search([('trip_customer', '!=', False)]):
-            if int(customer.trip_customer) not in external_numbers:
+
+            if int(customer.trip_customer) not in external_numbers and bool(customer.customer_rank):
                 print("\ncreated customer :::: ", customer.name)
                 data = {
                     'name': customer['name'],
