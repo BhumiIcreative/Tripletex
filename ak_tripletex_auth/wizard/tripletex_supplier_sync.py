@@ -17,7 +17,7 @@ class TripletexSupplierSync(models.TransientModel):
         if not password:
             raise ValidationError(_("Error: Authentication token not found."))
         try:
-            response = requests.get(f'{base_url}/customer',
+            response = requests.get(f'{base_url}/supplier',
                                     headers={'Content-Type': 'application/json', "Accept": "application/json"},
                                     auth=(0, password))
         except Exception as e:
@@ -53,58 +53,56 @@ class TripletexSupplierSync(models.TransientModel):
         return None
 
     def import_supplier_from_tripletex(self):
+        # self.env['tripletex.customer.load'].import_customer_from_tripletex()
         response = self.prepare_url_for_data_get()
-        external_numbers = set()
-        is_supplier = False
-        if response.status_code == 200:
-            external_numbers = {int(data['id']) for data in json.loads(response.text).get('values', []) if
-                                data.get('id')}
-        print("\n\naaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-        for customer in self.env['res.partner'].search([('trip_customer', '!=', False)]):
-            print("\n\nbbbbbbbbbbbbbbbbbbbbbbbbbbb")
-            if int(customer.trip_customer) not in external_numbers and data.get('id'):
-                print("\n\ncccccccccccccccccccccccccc")
-                print("\ncreated customer :::: ", customer.name)
-                data = {
-                    'name': customer['name'],
-                    'isSupplier': bool(customer.supplier_rank),
-                    'organizationNumber': customer.vat or None,
-                    'email': customer.email or None,
-                    'overdueNoticeEmail': customer.alternate_email or None,
-                    'phoneNumber': customer.phone or None,
-                    'phoneNumberMobile': customer.mobile or None,
-                    'isPrivateIndividual': False if customer.company_type == 'company' else True,
-                    'website': customer.website or None,
-                    'invoicesDueIn': customer.due_date,
-                    'singleCustomerInvoice': customer.is_single_customer_invoice,
-                    'isAutomaticSoftReminderEnabled': customer.is_soft_reminder,
-                    'isAutomaticReminderEnabled': customer.is_reminder,
-                    'isAutomaticNoticeOfDebtCollectionEnabled': customer.is_notice_od_debt,
-                    'discountPercentage': customer.discountPercentage,
-                    'invoiceEmail': customer.email,
-                    'description': customer.comment or '',
-                    'invoiceSendMethod': 'EMAIL',
-                    'physicalAddress': {
-                        "addressLine1": customer.business_street,
-                        "addressLine2": customer.business_street2,
-                        "postalCode": customer.business_zip,
-                        "city": customer.business_city,
-                        "country": {
-                            "id": self.env['res.partner'].get_country_id(customer.business_country_id.code)
-                        } if customer.business_country_id else None
-                    },
-                    "postalAddress": {
-                        "addressLine1": customer.street,
-                        "addressLine2": customer.street2,
-                        "postalCode": customer.zip,
-                        "city": customer.city,
-                        "country": {
-                            "id": self.env['res.partner'].get_country_id(customer.country_id.code)
-                        } if customer.country_id else None
-                    }
-                }
-                if customer.company_type == 'company':
-                    self.env['res.partner'].create_customer_in_tripletex(data, customer)
+        if response.status_code != 200:
+            raise ValidationError(_("Failed to fetch data from Tripletex."))
+
+        for data in json.loads(response.text).get('values', []):
+            trip_id = data.get('id')
+            postal_vals = self.env['tripletex.customer.load'].get_address_vals(data.get('postalAddress', {}).get('id') or 0)
+            business_vals = self.env['tripletex.customer.load'].get_address_vals(data.get('physicalAddress', {}).get('id') or 0, 'business_')
+
+            vals = {
+                'name': data.get('name'),
+                'email': data.get('email', ''),
+                'phone': data.get('phoneNumber', ''),
+                'mobile': data.get('phoneNumberMobile', ''),
+                'is_company': not data.get('isPrivateIndividual'),
+                'company_type': 'company' if not data.get('isPrivateIndividual') else 'person',
+                'trip_customer': trip_id,
+                'supplier_rank': 1 if data.get('isSupplier') else 0,
+                'customer_rank': 1 if data.get('isCustomer') else 0,
+                'vat': data.get('organizationNumber') or '',
+                'website': data.get('website', ''),
+                'comment': data.get('description') or '',
+                **postal_vals, **business_vals
+            }
+
+            customer = self.env['res.partner'].search([('trip_customer', '=', trip_id)], limit=1)
+            customer.write(vals) if customer else self.env['res.partner'].create(vals)
 
     def import_supplier_from_odoo(self):
-        print('*****************')
+        response = self.prepare_url_for_data_get()
+        external_numbers = {int(d['id']) for d in json.loads(response.text).get('values', []) if
+                            d.get('id')} if response.status_code == 200 else set()
+
+        for supplier in self.env['res.partner'].search([('trip_customer', '!=', False)]):
+            if int(supplier.trip_customer) not in external_numbers and supplier.supplier_rank:
+                print("\ncreated Supplier :::: ", supplier.name)
+                data = {
+                    'name': supplier.name,
+                    'isSupplier': bool(supplier.supplier_rank),
+                    'organizationNumber': supplier.vat or None,
+                    'email': supplier.email or None,
+                    'overdueNoticeEmail': supplier.alternate_email or None,
+                    'phoneNumber': supplier.phone or None,
+                    'phoneNumberMobile': supplier.mobile or None,
+                    'isPrivateIndividual': supplier.company_type != 'company',
+                    'website': supplier.website or None,
+                    'description': supplier.comment or '',
+                    'physicalAddress': self.env['tripletex.customer.load'].format_address(supplier, 'business_'),
+                    'postalAddress': self.env['tripletex.customer.load'].format_address(supplier)
+                }
+                if supplier.company_type == 'company':
+                    self.env['res.partner'].create_customer_in_tripletex(data, supplier)

@@ -1,4 +1,3 @@
-from future.backports.http.client import responses
 from odoo import fields, models, api, _
 import requests
 import json
@@ -64,85 +63,58 @@ class TripletexCustomerDataLoad(models.TransientModel):
             return response
         return None
 
+    def get_address_vals(self, address_id, prefix=''):
+        address = self.fetch_address_data(address_id)
+        if not address or not address.get('value'):
+            return {}
+        val = address['value']
+        country = self.get_country_data(val.get('country', {}).get('id')) if val.get('country') else {}
+        return {
+            f'{prefix}street': val.get('addressLine1'),
+            f'{prefix}street2': val.get('addressLine2'),
+            f'{prefix}zip': val.get('postalCode', ''),
+            f'{prefix}city': val.get('city', ''),
+            f'{prefix}country_id': self.env['res.country'].search(
+                [('code', '=', country.get('iso_alpha2_code', ''))], limit=1).id if prefix else country.get('id'),
+            f'{prefix}country_code': country.get('iso_alpha2_code', '') if prefix else ''
+        }
+
     def import_customer_from_tripletex(self):
+
         response = self.prepare_url_for_data_get()
-        if response.status_code == 200:
-            all_data = json.loads(response.text)
-            for data in all_data['values']:
-                print("\n\ndata::::::",data)
-                tripletex_id = data.get('id')
-                postal_address_data = data.get('postalAddress', {})
-                postal_vals = {}
-                if (
-                        postal_address_data
-                        and postal_address_data.get('id')
-                        and (address_data := self.fetch_address_data(postal_address_data['id']))
-                        and address_data.get('value')
-                ):
-                    country_data = address_data['value'].get('country', {})
-                    postal_country_data = self.get_country_data(country_data.get('id')) if country_data else {}
-                    postal_vals = {
-                        'street': address_data['value'].get('addressLine1'),
-                        'street2': address_data['value'].get('addressLine2'),
-                        'zip': address_data['value'].get('postalCode', ''),
-                        'city': address_data['value'].get('city', ''),
-                        'country_id': postal_country_data.get('id') if postal_country_data else False,
-                    }
-                business_address_data = data.get('physicalAddress', {})
-                business_vals = {}
-                if (
-                        business_address_data
-                        and business_address_data.get('id')
-                        and (address_data := self.fetch_address_data(business_address_data['id']))
-                        and address_data.get('value')
-                ):
-                    country_data = address_data['value'].get('country', {})
-                    business_country_data = self.get_country_data(country_data.get('id')) if country_data else {}
-                    business_vals = {
-                        'business_street': address_data['value'].get('addressLine1'),
-                        'business_street2': address_data['value'].get('addressLine2'),
-                        'business_zip': address_data['value'].get('postalCode', ''),
-                        'business_city': address_data['value'].get('city', ''),
-                        'business_country_id': self.env['res.country'].search(
-                            [('code', '=', business_country_data.get('iso_alpha2_code', ''))],
-                            limit=1).id if business_country_data else False,
-                        'business_country_code': business_country_data.get('iso_alpha2_code',
-                                                                           '') if business_country_data else '',
-                    }
+        if response.status_code != 200:
+            raise ValidationError(_("Failed to fetch data from Tripletex."))
 
-                customer_vals = {
-                    'name': data.get('name'),
-                    'email': data.get('email', ''),
-                    'phone': data.get('phoneNumber', ''),
-                    'mobile': data.get('phoneNumberMobile', ''),
-                    'is_company': not data.get('isPrivateIndividual'),
-                    'company_type': 'company' if not data.get('isPrivateIndividual') else 'person',
-                    'trip_customer': tripletex_id,
+        for data in json.loads(response.text).get('values', []):
+            trip_id = data.get('id')
+            postal_vals = self.get_address_vals(data.get('postalAddress', {}).get('id') or 0)
+            business_vals = self.get_address_vals(data.get('physicalAddress', {}).get('id') or 0, 'business_')
 
-                    # Additional fields from Tripletex payload
-                    'supplier_rank': 1 if data.get('isSupplier') else 0,
-                    'customer_rank': 1 if data.get('isCustomer') else 0,
-                    'vat': data.get('organizationNumber') or '',
-                    'alternate_email': data.get('overdueNoticeEmail') or '',
-                    'website': data.get('website') or '',
-                    'due_date': data.get('invoicesDueIn'),
-                    'is_single_customer_invoice': data.get('singleCustomerInvoice', False),
-                    'is_soft_reminder': data.get('isAutomaticSoftReminderEnabled', False),
-                    'is_reminder': data.get('isAutomaticReminderEnabled', False),
-                    'is_notice_od_debt': data.get('isAutomaticNoticeOfDebtCollectionEnabled', False),
-                    'discountPercentage': data.get('discountPercentage') or 0,
-                    'comment': data.get('description') or '',
-                    **postal_vals,
-                    **business_vals,
-                }
+            vals = {
+                'name': data.get('name'),
+                'email': data.get('email', ''),
+                'phone': data.get('phoneNumber', ''),
+                'mobile': data.get('phoneNumberMobile', ''),
+                'is_company': not data.get('isPrivateIndividual'),
+                'company_type': 'company' if not data.get('isPrivateIndividual') else 'person',
+                'trip_customer': trip_id,
+                'supplier_rank': 1 if data.get('isSupplier') else 0,
+                'customer_rank': 1 if data.get('isCustomer') else 0,
+                'vat': data.get('organizationNumber') or '',
+                'alternate_email': data.get('overdueNoticeEmail', ''),
+                'website': data.get('website', ''),
+                'due_date': data.get('invoicesDueIn'),
+                'is_single_customer_invoice': data.get('singleCustomerInvoice', False),
+                'is_soft_reminder': data.get('isAutomaticSoftReminderEnabled', False),
+                'is_reminder': data.get('isAutomaticReminderEnabled', False),
+                'is_notice_od_debt': data.get('isAutomaticNoticeOfDebtCollectionEnabled', False),
+                'discountPercentage': data.get('discountPercentage') or 0,
+                'comment': data.get('description') or '',
+                **postal_vals, **business_vals
+            }
 
-                customer = self.env['res.partner'].search([('trip_customer', '=', tripletex_id)], limit=1)
-                print("\n\ncustomer trip_customer::::::", customer.trip_customer)
-                if customer:
-                    customer.write(customer_vals)
-                else:
-                    print("\n\ncustomer name:::::::::::",data.get('name'))
-                    customer = self.env['res.partner'].create(customer_vals)
+            customer = self.env['res.partner'].search([('trip_customer', '=', trip_id)], limit=1)
+            customer.write(vals) if customer else self.env['res.partner'].create(vals)
 
     def fetch_address_data(self, address_id):
         password = self.env['tripletex.session.token'].search([], limit=1).token
@@ -185,25 +157,34 @@ class TripletexCustomerDataLoad(models.TransientModel):
         else:
             return {}
 
+    def format_address(self, customer, prefix=''):
+        return {
+            "addressLine1": getattr(customer, f"{prefix}street", ''),
+            "addressLine2": getattr(customer, f"{prefix}street2", ''),
+            "postalCode": getattr(customer, f"{prefix}zip", ''),
+            "city": getattr(customer, f"{prefix}city", ''),
+            "country": {
+                "id": self.env['res.partner'].get_country_id(getattr(customer, f"{prefix}country_id").code)
+            } if getattr(customer, f"{prefix}country_id") else None
+        }
+
     def import_customer_from_odoo(self):
         response = self.prepare_url_for_data_get()
-        external_numbers = set()
-        if response.status_code == 200:
-            external_numbers = {int(data['id']) for data in json.loads(response.text).get('values', []) if
-                                data.get('id')}
-        for customer in self.env['res.partner'].search([('trip_customer', '!=', False)]):
+        external_numbers = {int(d['id']) for d in json.loads(response.text).get('values', []) if
+                            d.get('id')} if response.status_code == 200 else set()
 
-            if int(customer.trip_customer) not in external_numbers and bool(customer.customer_rank):
+        for customer in self.env['res.partner'].search([('trip_customer', '!=', False)]):
+            if int(customer.trip_customer) not in external_numbers and customer.customer_rank:
                 print("\ncreated customer :::: ", customer.name)
                 data = {
-                    'name': customer['name'],
+                    'name': customer.name,
                     'isSupplier': bool(customer.supplier_rank),
                     'organizationNumber': customer.vat or None,
                     'email': customer.email or None,
                     'overdueNoticeEmail': customer.alternate_email or None,
                     'phoneNumber': customer.phone or None,
                     'phoneNumberMobile': customer.mobile or None,
-                    'isPrivateIndividual': False if customer.company_type == 'company' else True,
+                    'isPrivateIndividual': customer.company_type != 'company',
                     'website': customer.website or None,
                     'invoicesDueIn': customer.due_date,
                     'singleCustomerInvoice': customer.is_single_customer_invoice,
@@ -214,24 +195,8 @@ class TripletexCustomerDataLoad(models.TransientModel):
                     'invoiceEmail': customer.email,
                     'description': customer.comment or '',
                     'invoiceSendMethod': 'EMAIL',
-                    'physicalAddress': {
-                        "addressLine1": customer.business_street,
-                        "addressLine2": customer.business_street2,
-                        "postalCode": customer.business_zip,
-                        "city": customer.business_city,
-                        "country": {
-                            "id": self.env['res.partner'].get_country_id(customer.business_country_id.code)
-                        } if customer.business_country_id else None
-                    },
-                    "postalAddress": {
-                        "addressLine1": customer.street,
-                        "addressLine2": customer.street2,
-                        "postalCode": customer.zip,
-                        "city": customer.city,
-                        "country": {
-                            "id": self.env['res.partner'].get_country_id(customer.country_id.code)
-                        } if customer.country_id else None
-                    }
+                    'physicalAddress': self.format_address(customer, 'business_'),
+                    'postalAddress':  self.format_address(customer)
                 }
                 if customer.company_type == 'company':
                     self.env['res.partner'].create_customer_in_tripletex(data, customer)

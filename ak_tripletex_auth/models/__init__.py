@@ -1,10 +1,9 @@
 from . import tripletex_session_token
 from . import res_config_settings
-from . import tripletex_customer_data
+# from . import tripletex_customer_data
 from . import tripletex_postal_address_line
 from . import tripletax_delivery_address_line
 from . import tripletex_business_address_line
-from . import tripletex_contact_data
 from . import product_template
 from . import uom_common_code
 from . import uom_uom

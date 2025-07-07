@@ -2,12 +2,11 @@
     <menuitem id="session_main_menu" name="Tripletex Authentication" parent="base.menu_administration" sequence="5"/>
     <menuitem name="Data Sync" id="all_data_sync_menu_id" parent="ak_tripletex_auth.session_main_menu">
         <menuitem name="Product Sync" id="product_load_menu_id" action="action_tripletex_product_map" sequence="1"/>
-        <menuitem name="Contact Sync" id="contact_sync_menu_id" action="action_tripletex_contact_sync" sequence="2"/>
         <menuitem name="Customer Sync" id="customer_sync_menu_id" action="action_tripletex_customer_load" sequence="3"/>
         <menuitem name="Supplier Sync" id="supplier_sync_menu_id" action="action_tripletex_supplier_sync" sequence="4"/>
     </menuitem>
-    <menuitem id="tripletex_contact_data_create_id" name="Contact" parent="session_main_menu"
-              action="action_create_tripletex_contact_data"/>
+<!--    <menuitem id="tripletex_contact_data_create_id" name="Contact" parent="session_main_menu"-->
+<!--              action="action_create_tripletex_contact_data"/>-->
 <!--    <menuitem id="tripletex_customer_data_create_id" name="Customer" parent="session_main_menu"-->
 <!--              action="action_create_tripletex_customer_data"/>-->
     <menuitem id="session_create_id" name="Session" parent="session_main_menu"

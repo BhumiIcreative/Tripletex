@@ -132,7 +132,6 @@ class TripletexProductMap(models.TransientModel):
                                 full_unit_url = f"https://{product_unit_url}"
                             else:
                                 full_unit_url = product_unit_url
-                            print(f"\n:::::::full_unit_url {full_unit_url}")
                             try:
                                 unit_response = requests.get(full_unit_url, headers=headers, auth=auth)
                                 if unit_response.status_code == 200:
@@ -140,16 +139,12 @@ class TripletexProductMap(models.TransientModel):
                                     short_name = unit_data.get('nameShort', '').lower()
                                     full_name = unit_data.get('name')
                                     common_code_val = unit_data.get('commonCode')
-                                    print(f"\n:::::::unit_data {unit_data}")
-                                    print(f"\n:::::::full_name {full_name}")
-                                    print(f":::::::common_code_val {common_code_val}")
 
                                     common_code = None
                                     if common_code_val:
                                         common_code = self.env['uom.common.code'].search(
                                             [('name', '=', common_code_val)], limit=1)
                                     if short_name:
-                                        print(f":::::::short_name {short_name}")
                                         uom = self.env['uom.uom'].search([('name', '=', short_name)], limit=1)
                                         if not uom:
                                             uom_category = self.env['uom.category'].search([('name', '=', 'General')])

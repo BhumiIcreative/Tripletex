@@ -95,10 +95,13 @@ class ResPartner(models.Model):
         if base_url and password:
             for rec in vals_list:
                 if not rec.get('trip_customer'):
-                    print("\n$$$$$$$$$$")
+                    print("\nsupplier_rank::::::::::::",bool(rec.get('supplier_rank')))
+                    print("\ncustomer_rank::::::::::::",bool(rec.get('customer_rank')))
+
                     data = {
                         'name': rec['name'],
                         'isSupplier': bool(rec.get('supplier_rank')),
+                        'isCustomer': bool(rec.get('customer_rank')),
                         'organizationNumber': rec.get('vat') or None,
                         'email': rec.get('email') or None,
                         'overdueNoticeEmail': rec.get('alternate_email') or None,
@@ -152,7 +155,7 @@ class ResPartner(models.Model):
 
         if not base_url or not token:
             raise ValidationError("Tripletex configuration missing.")
-
+        print("\ndata",data)
         try:
             response = requests.post(
                 url=f'{base_url}/customer',
