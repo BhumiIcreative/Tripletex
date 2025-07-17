@@ -34,7 +34,6 @@
         'views/product_uom_views.xml',
         'wizard/session_token_wizard_views.xml',
         'views/tripletex_session_token_views.xml',
-        # 'views/tripletex_customer_data_views.xml',
         'wizard/tripletex_product_sync_views.xml',
         'wizard/tripletex_customer_sync_views.xml',
         'wizard/tripletex_supplier_sync_views.xml',

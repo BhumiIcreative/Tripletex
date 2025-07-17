@@ -15,7 +15,7 @@
         <field name="arch" type="xml">
             <form string="Tripletex Session Token">
                 <header>
-                    <button name="%(ak_tripletex_auth.action_session_token_wizard)d" string="Token Create"
+                    <button name="%(ak_tripletex_integration.action_session_token_wizard)d" string="Token Create"
                             type="action"/>
                 </header>
                 <sheet>

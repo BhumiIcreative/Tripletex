@@ -13,14 +13,6 @@
                                 name="product_sync" icon="fa-file"/>
                     </group>
                     <br/>
-<!--                    <p>This functionality will update product in Tripletex from Odoo if both share the same Odoo-->
-<!--                        default code and Tripletex number.-->
-<!--                    </p>-->
-<!--                   <group>-->
-<!--                        <button string="Product Sync Odoo to Tripletex" class="oe_highlight" type="object"-->
-<!--                                name="product_sync_to_tripeltex" icon="fa-file"/>-->
-<!--                    </group>-->
-<!--                    <br/>-->
                     <p>This functionality will import products from Tripletex to Odoo if the product is not in Odoo.
                     </p>
                     <group>

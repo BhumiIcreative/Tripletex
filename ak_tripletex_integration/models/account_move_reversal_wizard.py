@@ -37,7 +37,7 @@ class AccountMoveReversal(models.TransientModel):
         """
         print('\n000000reverse_moves000')
         result = super().reverse_moves()
-        base_url = self.env['ir.config_parameter'].sudo().get_param('ak_tripletex_auth.base_url')
+        base_url = self.env['ir.config_parameter'].sudo().get_param('ak_tripletex_integration.base_url')
         password = self.env['tripletex.session.token'].search([],limit=1).token
         if not base_url or not password:
             return result

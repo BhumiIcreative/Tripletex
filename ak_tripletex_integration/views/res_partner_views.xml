@@ -8,11 +8,13 @@
                 <xpath expr="//div[@class='o_address_format']" position="after">
                     <field name="is_hidden" widget="boolean_toggle"/>
                     <field name="trip_customer" invisible="not is_hidden"/>
+                    <field name="active" widget="boolean_toggle"/>
                 </xpath>
+                <field name="email" position="attributes">
+                    <attribute name="required">1</attribute>
+                </field>
                 <xpath expr="//field[@name='website']" position="before">
-                    <!--                    <group>-->
                     <field name="alternate_email" widget="email"/>
-                    <!--                    </group>-->
                 </xpath>
                 <xpath expr="//page[@name='internal_notes']" position="after">
 
@@ -39,13 +41,13 @@
                                     </div>
                                 </div>
                             </group>
-                            <group string="Automatic reminders">
+                            <group string="Automatic reminders" invisible="supplier_rank and not customer_rank">
                                 <field name="is_soft_reminder"/>
                                 <field name="is_reminder"/>
                                 <field name="is_notice_od_debt"/>
                             </group>
                         </group>
-                        <group string="Invoice Setting">
+                        <group string="Invoice Setting" invisible="supplier_rank and not customer_rank ">
                             <group>
                                 <field name="due_date"/>
                                 <field name="discountPercentage"/>

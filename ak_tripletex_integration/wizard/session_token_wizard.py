@@ -23,31 +23,32 @@ class SessionTokenWizard(models.TransientModel):
            ValidationError: If required config parameters are missing, the API call fails,
                             or Tripletex returns an error response.
         """
-        base_url = self.env['ir.config_parameter'].sudo().get_param('ak_tripletex_auth.base_url')
-        customer_token = self.env['ir.config_parameter'].sudo().get_param('ak_tripletex_auth.customer_token')
-        employee_token = self.env['ir.config_parameter'].sudo().get_param('ak_tripletex_auth.employee_token')
+        ICPSudo = self.env['ir.config_parameter'].sudo()
+        base_url = ICPSudo.get_param('ak_tripletex_integration.base_url')
+        customer_token = ICPSudo.get_param('ak_tripletex_integration.customer_token')
+        employee_token = ICPSudo.get_param('ak_tripletex_integration.employee_token')
         if not base_url:
-            raise ValidationError(_("Error: Base URL not configured. Please set 'ak_tripletex_auth.base_url' in the config parameters."))
-        if not customer_token and employee_token:
-            raise ValidationError(_("Error: consumer and employee token not found."))
+            raise ValidationError(
+                _("Error: Base URL not configured. Please set 'ak_tripletex_integration.base_url' in the config parameters."))
+        if not (customer_token or employee_token):
+            raise ValidationError(_("Error: Consumer or Employee token not found."))
         try:
             response = requests.put(
-                f'{base_url}/token/session/:create', params={'consumerToken': customer_token, 'employeeToken': employee_token, 'expirationDate': self.expiration_date.strftime('%Y-%m-%d')})
+                f'{base_url}/token/session/:create',
+                params={'consumerToken': customer_token, 'employeeToken': employee_token,
+                        'expirationDate': self.expiration_date.strftime('%Y-%m-%d')})
         except Exception as e:
             raise ValidationError(e)
-        token = self.env['tripletex.session.token'].search([],limit=1)
-        print('\n=======response0',response)
+        token = self.env['tripletex.session.token'].search([], limit=1)
         if response.status_code == 200:
             response_data = response.json()
+            vals = {
+                'expiration_date': response_data.get('value').get('expirationDate'),
+                'token': response_data.get('value').get('token')
+            }
             if token:
-                token.write({
-                        'expiration_date': response_data['value']['expirationDate'],
-                        'token': response_data['value']['token']
-                    })
+                token.update(vals)
             else:
-                self.env['tripletex.token'].create({
-                    'expiration_date': response_data['value']['expirationDate'],
-                    'token': response_data['value']['token']
-                })
+                self.env['tripletex.token'].create(vals)
         else:
             raise ValidationError(_("Error create session token in Tripletex: %s") % response.text)
