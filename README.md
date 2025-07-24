@@ -90,7 +90,10 @@ Sync Data
   - Soft reminder -> Soft reminder
   - Reminder -> Reminder
   - Notice of debt collection -> Notice of debt collection
-  - 
+  - Invoice Send Method -> Invoice Send Method
+  - Send Invoice By Email as -> Send Invoice By Email as
+  - Invoice Due Type -> Invoice Due Type
+  
 #### Create & Write & Unlink
 
 - When create a customer than email is require for creation in tripletex because invoice email is require in tripletex.
@@ -106,7 +109,7 @@ Sync Data
 
 - For Update the data click Import Customers From Odoo Button from 
   - General Setting -> Tripletex Authentication menu -> Customer Sync -> Import Customers From Odoo
-- Import customer from odoo if customer_rank > 1.
+- Import customer from odoo if customer_rank >= 1.
 - If Customer have email.
 
 #### For Tripletex to Odoo:
@@ -147,13 +150,20 @@ Sync Data
 
 - For Update the data click Import Supplier From Odoo Button from 
   - General Setting -> Tripletex Authentication menu -> Supplier Sync -> Import Supplier From Odoo
-- Import Supplier from odoo if supplier_rank > 1.
+- Import Supplier from odoo if supplier_rank >= 1.
 
 #### For Tripletex to Odoo:
 
 - For Update the data click Import Supplier From Tripletex Button from 
   - General Setting -> Tripletex Authentication menu -> Supplier Sync -> Import Supplier From Tripletex
 - Import from Tripletex if Customer type is Supplier and crated in vendor(supplier_rank = 1).
+
+### Invoice Sync
+#### Basic Information
+
+- When conform the invoice from odoo then create in the tripletex.
+- A custom text field is added on the invoice line to override the product description.
+- If the custom text field is empty, the product description should be used instead. 
 
 ## Usage
 

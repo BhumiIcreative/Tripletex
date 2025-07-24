@@ -8,7 +8,7 @@
                     <p>This functionality will update supplier in Tripletex from Odoo.
                     </p>
                     <group>
-                        <button string="Supplier Sync" class="oe_highlight" type="object"
+                        <button string="Supplier Sync to Odoo" class="oe_highlight" type="object"
                                 name="supplier_sync" icon="fa-file"/>
                     </group>
                     <br/>

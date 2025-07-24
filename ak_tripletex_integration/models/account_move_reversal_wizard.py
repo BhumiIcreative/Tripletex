@@ -1,13 +1,14 @@
 from odoo import fields, models, api
 import requests
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountMoveReversal(models.TransientModel):
-    _inherit = 'account.move.reversal'
+    _inherit = "account.move.reversal"
 
-    invoice = fields.Integer(
-        string="Invoice"
-    )
+    invoice = fields.Integer(string="Invoice")
 
     @api.model
     def default_get(self, fields_list):
@@ -17,12 +18,18 @@ class AccountMoveReversal(models.TransientModel):
         - Sets the 'invoice' field based on the active record.
         - Sets the 'refund_method' to 'cancel' by default.
         """
-        print('\n000000default_get000')
         res = super().default_get(fields_list)
-        active_id = self._context.get('active_id')
+        active_id = self.env.context.get("active_id")
+
         if active_id:
-            res['invoice'] = self.env['account.move'].browse(int(active_id)).invoice
-            res['refund_method'] = 'cancel'
+            invoice = self.env["account.move"].browse(int(active_id))
+            if invoice.exists():
+                res.update(
+                    {
+                        "invoice": invoice.invoice,
+                        "refund_method": "cancel",
+                    }
+                )
         return res
 
     def reverse_moves(self):
@@ -35,17 +42,27 @@ class AccountMoveReversal(models.TransientModel):
         Returns:
             result: The standard result of the super call to reverse_moves.
         """
-        print('\n000000reverse_moves000')
         result = super().reverse_moves()
-        base_url = self.env['ir.config_parameter'].sudo().get_param('ak_tripletex_integration.base_url')
-        password = self.env['tripletex.session.token'].search([],limit=1).token
-        if not base_url or not password:
+
+        base_url = (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("ak_tripletex_integration.base_url")
+        )
+        token = self.env["tripletex.session.token"].search([], limit=1).token
+
+        if not base_url or not token:
             return result
-        for rec in self:
-            if rec.invoice:
-                response = requests.put(
-                    url=f'{base_url}/invoice/{rec.invoice}/:createCreditNote?date={rec.date}&comment={rec.reason}',
-                    auth=('0', password),
-                    headers={'Content-Type': 'application/json', "Accept": "application/json"},
-                )
+
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        auth = ("0", token)
+        for rec in self.filtered(lambda x: x.invoice):
+            try:
+                url = f'{base_url}/invoice/{rec.invoice}/:createCreditNote?date={rec.date}&comment={rec.reason or ""}'
+                requests.put(url, auth=auth, headers=headers)
+            except Exception as e:
+                _logger.error("Tripletex credit note error: %s", e)
         return result

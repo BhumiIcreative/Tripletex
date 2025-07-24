@@ -7,7 +7,7 @@
                  <p style="text-align:center;">
                 <p>This functionality will map Odoo Customer with Tripletex Customer if they both have the same name and email.</p>
                 <group >
-                    <button name="customer_data_get" string="Sync Customer" class="oe_highlight" type="object"/>
+                    <button name="customer_data_get" string="Sync Customer to Odoo" class="oe_highlight" type="object"/>
                 </group>
                 <br/>
                 <p>This functionality will create Customer from Tripletex to odoo.</p>
@@ -19,11 +19,6 @@
                 <group>
                     <button name="import_customer_from_odoo" string="Import Customers from Odoo" class="oe_highlight" type="object"/>
                 </group>
-<!--                <br/>-->
-<!--                     <p>This functionality will create Customer from Odoo to Tripletex .</p>-->
-<!--                <group >-->
-<!--                    <button name="contact_data_get_from_tripletex" string="Import Customers from Odoo" class="oe_highlight" type="object"/>-->
-<!--                </group>-->
                 </p>
                 <footer>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>

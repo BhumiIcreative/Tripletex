@@ -1,5 +1,5 @@
 <odoo>
-    <data>
+        <!-- Inherit for add fields -->
         <record id="ak_tripletex_invoice_inherit_view_move_form" model="ir.ui.view">
             <field name="name">account.move.form.view</field>
             <field name="model">account.move</field>
@@ -17,11 +17,11 @@
                 </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='product_id']" position="after">
                     <field name="tripletex_product" optional="hide"/>
+                    <field name="custom_text"/>
                 </xpath>
                 <xpath expr="//button[@name='button_draft']" position="attributes">
                     <attribute name="invisible">true</attribute>
                 </xpath>
             </field>
         </record>
-    </data>
 </odoo>
