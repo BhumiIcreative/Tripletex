@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_reconcile_model_form_perfect_match" model="ir.ui.view">
+        <field name="name">account.reconcile.model.form.perfect.match</field>
+        <field name="model">account.reconcile.model</field>
+        <field name="inherit_id" ref="account.account_reconcile_model_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='auto_reconcile']" position="after">
+                <field name="perfect_match_enabled"/>
+                <field name="perfect_match_use_date" attrs="{'invisible': [('perfect_match_enabled', '=', False)]}"/>
+                <field name="perfect_match_tolerance" attrs="{'invisible': [('perfect_match_enabled', '=', False)]}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
